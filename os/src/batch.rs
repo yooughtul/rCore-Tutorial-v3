@@ -3,7 +3,7 @@ use crate::trap::TrapContext;
 use crate::sync::UPSafeCell;
 use core::arch::asm;
 
-const USER_STACK_SIZE: usize = 4096 * 2;
+const USER_STACK_SIZE: usize = 4096 ;
 const KERNEL_STACK_SIZE: usize = 4096 * 2;
 const MAX_APP_NUM: usize = 16;
 const APP_BASE_ADDRESS: usize = 0x80400000;
@@ -81,6 +81,13 @@ impl AppManager {
     pub fn move_to_next_app(&mut self) {
         self.current_app += 1;
     }
+    pub fn get_current_app_range(&self)->(usize,usize){
+        (APP_BASE_ADDRESS,APP_BASE_ADDRESS+APP_SIZE_LIMIT)
+    }
+}
+
+pub fn get_current_app_range()->(usize,usize){
+    APP_MANAGER.exclusive_access().get_current_app_range()
 }
 
 lazy_static! {
@@ -126,4 +133,8 @@ pub fn run_next_app() -> ! {
         ) as *const _ as usize);
     }
     panic!("Unreachable in batch::run_current_app!");
+}
+
+pub fn get_user_stack_range()->(usize,usize){
+    (USER_STACK.get_sp()-USER_STACK_SIZE,USER_STACK.get_sp())
 }
